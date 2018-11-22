@@ -1,0 +1,26 @@
+#!/usr/bin/env node
+const path = require("path");
+const yargs = require("yargs");
+const { Bundler } = require("../dist/bundler");
+
+const argv = yargs
+	.usage("Usage: $0 --entry [string] --output [string] --libraryName [string] -i [character]")
+	.example("$0 --entry .declaration/index.d.ts --output index.d.ts --libraryName asewome-lib")
+	.alias("e", "entry")
+	.describe("entry", "Index of the dts produced by tsc.")
+	.alias("o", "output")
+	.describe("output", "Output path & name for the dts bundle.")
+	.alias("l", "libraryName")
+	.describe("libraryName", "Name of your library as specified in your package.json")
+	.alias("i", "indent")
+	.describe("indent", "Choosen indentation for your .d.ts")
+	.default("indent", "\\t")
+	.demandOption(["entry", "output", "libraryName"])
+	.argv;
+
+Bundler.bundle({
+	entry: path.resolve(argv.entry),
+	output: path.resolve(argv.output),
+	libraryName: argv.libraryName,
+	indent: argv.indent === "\\t" ? "\t" : argv.indent,
+});

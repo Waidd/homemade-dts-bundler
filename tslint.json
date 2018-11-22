@@ -1,0 +1,45 @@
+{
+	"extends": "tslint:recommended",
+	"linterOptions": {
+    "exclude": [
+			"**/*.json"
+		]
+  },
+	"rules": {
+		"file-name-casing": [
+			true,
+			"camel-case"
+		],
+		"indent": [
+			true,
+			"tabs"
+		],
+		"linebreak-style": [
+			true,
+			"LF"
+		],
+		"member-access": [
+			true,
+			"check-accessor",
+			"check-constructor",
+			"check-parameter-property"
+		],
+		"member-ordering": false,
+		"no-namespace": [
+			true,
+			"allow-declarations"
+		],
+		"object-literal-sort-keys": false,
+		"ordered-imports": false,
+		"prefer-template": true,
+		"variable-name": [
+			true,
+			"check-format",
+			"allow-leading-underscore"
+		],
+		"max-line-length": [
+			true,
+			160
+		]
+	}
+}
