@@ -37,7 +37,7 @@ export class TreeExplorer {
 		const declarationFile = await this._fileHandler.handleFile(entry);
 
 		// async reduce on the relative imports found in the entry file
-		const subDeclarationsFiles = await declarationFile.imports.reduce(async (p: DeclarationTree, fileAbsolutePath: string): DeclarationTree => {
+		const declarationFiles = await declarationFile.imports.reduce(async (p: DeclarationTree, fileAbsolutePath: string): DeclarationTree => {
 			const previousFiles = await p;
 
 			// if the file is in the map, it has already been handled
@@ -46,8 +46,8 @@ export class TreeExplorer {
 
 			// return in an array the result of all the handleFile call.
 			return [...previousFiles, ...(await this._explore(fileAbsolutePath, map))];
-		}, Promise.resolve(new Array<IDeclarationObject>()));
+		}, Promise.resolve(new Array<IDeclarationObject>(declarationFile)));
 
-		return [declarationFile, ...subDeclarationsFiles];
+		return declarationFiles;
 	}
 }
