@@ -117,19 +117,31 @@ export class FileHandler {
 	private async _resolveRelativeImports(declarationFile: IDeclarationObject): Promise<void> {
 		const fileDirname = path.dirname(declarationFile.moduleFilePath);
 
-		// any sentence start with from or import followed by a double quote path start with a dot
-		const regex = /(from|import) "(\.[a-zA-Z0-9\/\.\-]*)";/g;
+		// Match any sentence starting by import|export with at the end a relative path (starting with a dot)
+		// surrounded by single or double quote. Will capture the content between import|export and the path.
+		// It will not handle properly any comment written between import/export and the path.
+		const regex = /(import|export)\s+(([{}\s\w,]*|\*)\s+from\s+)?["'](\.[\w\/\.\-]*)["'];?\n?/g;
 
 		let rawImport;
 		// tslint:disable-next-line:no-conditional-assignment
 		while ((rawImport = regex.exec(declarationFile.content)) !== null) {
 			if (this._isInStringOrComment(declarationFile.content, rawImport.index)) { continue; }
 
-			const [importSentence, , importPath] = rawImport;
+			const [importSentence, , , , importPath] = rawImport;
 
 			// check if path is a path.d.ts, a path/index.d.ts or something else
 			const completeImportPath = await this._findFile(importPath, declarationFile.absoluteFilePath);
-			if (completeImportPath === null) { continue; }
+			if (completeImportPath === null) {
+				// if there is a missing .d.ts, an error is triggered
+				if (importPath.endsWith(".d.ts")) { throw new Error(`File not found: ${importPath}`); }
+
+				// else remove the import/export
+				declarationFile.content = declarationFile.content.slice(0, rawImport.index) + declarationFile.content.slice(rawImport.index + importSentence.length);
+
+				regex.lastIndex -= importSentence.length;
+
+				continue;
+			}
 
 			// push the relative path to parse later
 			declarationFile.imports.push(path.resolve(path.dirname(declarationFile.absoluteFilePath), `${completeImportPath}.d.ts`));
