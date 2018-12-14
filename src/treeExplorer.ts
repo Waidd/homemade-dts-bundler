@@ -1,5 +1,6 @@
 import { IDTSOptions } from "./options";
 import { FileHandler, IDeclarationObject } from "./fileHandler";
+import { AFileInterface } from "./fileInterfaces/fileInterface";
 
 type DeclarationTree = Promise<IDeclarationObject[]>;
 
@@ -13,10 +14,11 @@ export class TreeExplorer {
 	/**
 	 * TreeExplorer constructor.
 	 * @param options Bundling options as specified in IDTSOptions
+	 * @param fileInterface fileInterface to handle file I/O.
 	 */
-	public constructor(options: IDTSOptions) {
+	public constructor(options: IDTSOptions, fileInterface: AFileInterface) {
 		this._options = options;
-		this._fileHandler = new FileHandler(options);
+		this._fileHandler = new FileHandler(options, fileInterface);
 	}
 
 	/**

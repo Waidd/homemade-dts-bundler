@@ -1,10 +1,7 @@
-import { promisify } from "util";
-import * as fs from "fs";
 import * as path from "path";
-const readFile = promisify(fs.readFile);
-const stat = promisify(fs.stat);
 
 import { IDTSOptions } from "./options";
+import { AFileInterface } from "./fileInterfaces/fileInterface";
 
 /**
  * Declaration object.
@@ -35,13 +32,16 @@ export interface IDeclarationObject {
  */
 export class FileHandler {
 	private _options: IDTSOptions;
+	private _fileInterface: AFileInterface;
 
 	/**
 	 * FileHandler constructor.
 	 * @param options Bundling options as specified in IDTSOptions
+	 * @param fileInterface fileInterface to handle file I/O.
 	 */
-	public constructor(options: IDTSOptions) {
+	public constructor(options: IDTSOptions, fileInterface: AFileInterface) {
 		this._options = options;
+		this._fileInterface = fileInterface;
 	}
 
 	/**
@@ -55,7 +55,7 @@ export class FileHandler {
 		const declarationFile = {
 			absoluteFilePath,
 			moduleFilePath: absoluteFilePath.replace(basePath, "").replace(".d.ts", ""),
-			content: (await readFile(absoluteFilePath)).toString(),
+			content: (await this._fileInterface.readFile(absoluteFilePath)),
 			imports: [],
 		} as IDeclarationObject;
 
@@ -90,20 +90,14 @@ export class FileHandler {
 	private async _findFile(filePath: string, absoluteFilePath: string): Promise<string> {
 		const dirname = path.dirname(absoluteFilePath);
 
-		try {
-			const straitPath = path.resolve(dirname, `${filePath}.d.ts`);
-			await stat(straitPath);
+		const straitPath = path.resolve(dirname, `${filePath}.d.ts`);
+		if (await this._fileInterface.exists(straitPath)) {
 			return filePath;
-		} catch (up) {
-			if (up.code !== "ENOENT") { throw up; }
 		}
 
-		try {
-			const indexPath = path.resolve(dirname, filePath, "index.d.ts");
-			await stat(indexPath);
+		const indexPath = path.resolve(dirname, filePath, "index.d.ts");
+		if (await this._fileInterface.exists(indexPath)) {
 			return path.join(filePath, "index");
-		} catch (up) {
-			if (up.code !== "ENOENT") { throw up; }
 		}
 
 		return null;
@@ -162,7 +156,7 @@ export class FileHandler {
 	 * Check if the targetted index is in a comment or a string
 	 * @param str
 	 * @param targetIndex
-	 * @returns
+	 * @returns a boolean resolving the condition.
 	 */
 	private _isInStringOrComment(str: string, targetIndex: number): boolean {
 		let isLongComment = false;
