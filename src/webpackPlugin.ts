@@ -28,6 +28,12 @@ export class HomemadeDTSBundlerPlugin {
 	 * @param compiler webpack compiler.
 	 */
 	public apply(compiler: webpack.Compiler) {
-		compiler.hooks.done.tapPromise("homemadeDTSBundler", () => Bundler.bundle(this._options));
+		compiler.hooks.done.tapPromise("homemadeDTSBundler", async (compilation: webpack.Stats) => {
+			try {
+				await Bundler.bundle(this._options);
+			} catch (e) {
+				compilation.compilation.errors.push(new Error(`homemade-dts-bundler:\n\t${e.message}`));
+			}
+		});
 	}
 }
