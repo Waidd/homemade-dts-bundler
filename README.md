@@ -31,6 +31,7 @@ See the options:
 ## Usage with webpack
 
 The module come with a webpack plugin.
+In this case, files will be readed/writed through the webpack compilation assets.
 
 ```javascript
 const { HomemadeDTSBundlerPlugin } = require("homemade-dts-bundler");

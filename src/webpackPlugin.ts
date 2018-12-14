@@ -1,5 +1,5 @@
 import { resolve } from "path";
-import webpack = require("webpack");
+import * as webpack from "webpack";
 
 import { IDTSOptions } from "./options";
 import { Bundler } from "./bundler";
@@ -28,6 +28,12 @@ export class HomemadeDTSBundlerPlugin {
 	 * @param compiler webpack compiler.
 	 */
 	public apply(compiler: webpack.Compiler) {
-		compiler.hooks.done.tapPromise("homemadeDTSBundler", () => Bundler.bundle(this._options));
+		compiler.hooks.emit.tapPromise("homemadeDTSBundler", async (compilation: webpack.compilation.Compilation) => {
+			try {
+				await Bundler.bundleWithWebpack(this._options, compilation);
+			} catch (e) {
+				compilation.errors.push(new Error(`homemade-dts-bundler:\n\t${e.message}`));
+			}
+		});
 	}
 }
