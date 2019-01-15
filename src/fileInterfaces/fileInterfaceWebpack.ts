@@ -1,21 +1,38 @@
-import * as webpack from "webpack";
 import { resolve } from "path";
 
 import { AFileInterface } from "./fileInterface";
 
 /**
+ * Interface providing inputs for FileInterfaceWepback class.
+ */
+export interface IWebpackAssets {
+	/**
+	 * Direct reference to webpack assets object, used for asset emitting.
+	 */
+	assetsRef: any;
+	/**
+	 * List of webpack compilation assets, including assets from previous run in watch mode.
+	 */
+	allAssets: { [path: string]: any };
+	/**
+	 * Webpack output path.
+	 */
+	outputPath: string;
+}
+
+/**
  * Interface to read & write files throught webpack compilation.
  */
 export class FileInterfaceWebpack extends AFileInterface {
-	private _compilation: webpack.compilation.Compilation;
+	private _webpackAssets: IWebpackAssets;
 
 	/**
 	 * Constructor of the interface.
 	 * @param compilation webpack compilation to read/write from.
 	 */
-	public constructor(compilation: webpack.compilation.Compilation) {
+	public constructor(webpackAssets: IWebpackAssets) {
 		super();
-		this._compilation = compilation;
+		this._webpackAssets = webpackAssets;
 	}
 
 	/**
@@ -25,7 +42,7 @@ export class FileInterfaceWebpack extends AFileInterface {
 	 */
 	public async readFile(absolutePath: string): Promise<string> {
 		const relativePath = this._getRelativePath(absolutePath);
-		return this._compilation.assets[relativePath].source();
+		return this._webpackAssets.allAssets[relativePath].source();
 	}
 
 	/**
@@ -36,7 +53,7 @@ export class FileInterfaceWebpack extends AFileInterface {
 	public async exists(absolutePath: string): Promise<boolean> {
 		const relativePath = this._getRelativePath(absolutePath);
 
-		return this._compilation.assets[relativePath] !== undefined;
+		return this._webpackAssets.allAssets[relativePath] !== undefined;
 	}
 
 	/**
@@ -48,14 +65,14 @@ export class FileInterfaceWebpack extends AFileInterface {
 	public async writeFile(absolutePath: string, content: string): Promise<void> {
 		const relativePath = this._getRelativePath(absolutePath);
 
-		this._compilation.assets[relativePath] = {
+		this._webpackAssets.assetsRef[relativePath] = {
 			source: () => new Buffer(content),
 			size: () => Buffer.byteLength(content),
 		};
 	}
 
 	private _getRelativePath(absolutePath: string): string {
-		const basePath = resolve(this._compilation.compiler.options.output.path);
+		const basePath = resolve(this._webpackAssets.outputPath);
 		// remove basePath & heading / or \
 		return absolutePath.replace(basePath, "").slice(1);
 	}
