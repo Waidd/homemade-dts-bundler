@@ -1,6 +1,6 @@
 {
   "name": "homemade-dts-bundler",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Homemade dts bundler. Not much options but should handle module merging. Webpack plugin inside.",
   "keywords": ["typescript", "dts", ".d.ts", "bundler", "webpack"],
   "main": "dist/index.js",

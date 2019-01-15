@@ -56,6 +56,7 @@ export class FileInterfaceWebpack extends AFileInterface {
 
 	private _getRelativePath(absolutePath: string): string {
 		const basePath = resolve(this._compilation.compiler.options.output.path);
-		return absolutePath.replace(`${basePath}/`, "");
+		// remove basePath & heading / or \
+		return absolutePath.replace(basePath, "").slice(1);
 	}
 }
