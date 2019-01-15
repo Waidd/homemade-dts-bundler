@@ -1,8 +1,6 @@
-import * as  webpack from "webpack";
-
 import { IDTSOptions } from "./options";
 import { TreeExplorer } from "./treeExplorer";
-import { AFileInterface, FileInterfaceFilesystem, FileInterfaceWebpack } from "./fileInterfaces";
+import { AFileInterface, FileInterfaceFilesystem, FileInterfaceWebpack, IWebpackAssets } from "./fileInterfaces";
 
 /**
  * Bundle declaration files from tsc output to a single file using the options.
@@ -24,8 +22,8 @@ export class Bundler {
 	 * @param compilation Webpack compilation.
 	 * @returns a promise resolved when the file is writed in the compilation assets.
 	 */
-	public static async bundleWithWebpack(options: IDTSOptions, compilation: webpack.compilation.Compilation) {
-		const bundler = new Bundler(options, new FileInterfaceWebpack(compilation));
+	public static async bundleWithWebpack(options: IDTSOptions, webpackAssets: IWebpackAssets) {
+		const bundler = new Bundler(options, new FileInterfaceWebpack(webpackAssets));
 		await bundler.bundle();
 	}
 
